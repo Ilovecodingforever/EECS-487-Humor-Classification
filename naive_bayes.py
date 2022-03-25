@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 
 
-class NaiveBayes():
+class NaiveBayes:
     """Naive Bayes classifier."""
 
     def __init__(self):

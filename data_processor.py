@@ -30,6 +30,7 @@ class HumorDataset(Dataset):
         sentences: list of sentence embeddings, N x * x 300
         label: tensor of one-hot encodings, N x #classes
     """
+
     def __init__(self, data_text: List, data_label: List):
 
         if not exists('vectors.kv'):
@@ -56,10 +57,10 @@ class HumorDataset(Dataset):
             w = word_tokenize(t.lower())
             lst = []
             for x in w:
-              if x in self.embed:
-                lst.append(torch.tensor(self.embed[x]))
-              else:
-                lst.append(torch.tensor(self.embed['unk']))
+                if x in self.embed:
+                    lst.append(torch.tensor(self.embed[x]))
+                else:
+                    lst.append(torch.tensor(self.embed['unk']))
             self.sentences.append(torch.vstack(lst))
 
     def __len__(self):
