@@ -62,7 +62,6 @@ class HumorDataset(Dataset):
                 else:
                     lst.append(torch.tensor(self.embed['unk']))
             self.sentences.append(torch.vstack(lst))
-
     def __len__(self):
         return len(self.data_text)
 

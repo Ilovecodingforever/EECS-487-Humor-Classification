@@ -3,7 +3,7 @@ from tqdm.notebook import tqdm
 from train import get_optimizer, train_model, plot_loss, get_performance, get_hyper_parameters
 from model import Model
 from naive_bayes import NaiveBayes, evaluate
-from data_procesor import basic_collate_fn, HumorDataset, load_data, load_data_nb
+from data_processor import basic_collate_fn, HumorDataset, load_data, load_data_nb
 import os
 
 
