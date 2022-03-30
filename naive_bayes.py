@@ -17,8 +17,8 @@ class NaiveBayes:
         # TODO: store ngram counts for each category in self.ngram_count
         self.vectorizer = CountVectorizer(ngram_range=(1, 2), max_df=0.8, min_df=3)
         self.vectorizer.fit(data.text)
-        for label_i in range(len(pd.unique(data.label))):
-            data_i = data[data.label == label_i]
+        for label_i in range(len(pd.unique(data.is_humor))):
+            data_i = data[data.is_humor == label_i]
             raw_counts = self.vectorizer.transform(data_i.text)
             self.ngram_count.append(np.asarray(raw_counts.sum(axis=0)))
             self.total_count.append(raw_counts.sum())

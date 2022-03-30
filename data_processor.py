@@ -33,12 +33,12 @@ class HumorDataset(Dataset):
 
     def __init__(self, data_text: List, data_label: List):
 
-        if not exists('vectors.kv'):
+        if not exists('/content/drive/My Drive/EECS-487-Project/vectors.kv'):
             self.embed = gensim.downloader.load('glove-wiki-gigaword-300')
             word_vectors = self.embed
-            word_vectors.save('vectors.kv')
+            word_vectors.save('/content/drive/My Drive/EECS-487-Project/vectors.kv')
         else:
-            self.embed = KeyedVectors.load('vectors.kv')
+            self.embed = KeyedVectors.load('/content/drive/My Drive/EECS-487-Project/vectors.kv')
 
         self.data_text = data_text
         self.data_label = data_label
@@ -46,12 +46,14 @@ class HumorDataset(Dataset):
         self.label = None
 
         for l in data_label:
-            temp = torch.zeros(3, dtype=torch.int64)
-            temp[int(l)] = 1
+            temp = torch.zeros((1, 3), dtype=torch.float32)
+            temp[0, int(l)] = 1
+            # print(temp)
             if self.label is None:
                 self.label = temp
             else:
-                self.label = torch.cat((self.label, temp))
+                self.label = torch.vstack((self.label, temp))
+                # print(self.label)
 
         for t in data_text:
             w = word_tokenize(t.lower())
@@ -72,7 +74,10 @@ class HumorDataset(Dataset):
 def basic_collate_fn(batch):
     """Collate function for basic setting."""
     sentences = [i['sentences'] for i in batch]
+    # labels = [i['labels'] for i in batch]
     labels = [i['labels'] for i in batch]
+    labels = torch.vstack(labels)
+    
     return sentences, labels
 
 

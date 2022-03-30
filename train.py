@@ -6,6 +6,7 @@ from torch import nn
 import torch.nn.functional as F
 import torch.optim as optimizer
 import matplotlib.pyplot as plt
+import sklearn
 
 
 def get_loss_fn():
@@ -68,6 +69,13 @@ def train_model(net, trn_loader, val_loader, optim, scheduler, num_epoch=50,
 
             optim.zero_grad()
             logits = net(sentences)
+
+            # print(labels)
+            # print(gdfs)
+
+            # print(logits)
+            # print(labels)
+
             loss = calculate_loss(logits, labels, loss_fn)
 
             loss.backward()
@@ -82,6 +90,8 @@ def train_model(net, trn_loader, val_loader, optim, scheduler, num_epoch=50,
                 train_loss.append(loss.item())
                 train_loss_ind.append(num_itr)
         if verbose:
+            # print(logits)
+            # print(labels)
             print('Epoch No. {0}--Iteration No. {1}-- batch loss = {2:.4f}'.format(
                 epoch + 1,
                 num_itr,
@@ -157,20 +167,31 @@ def get_performance(net, loss_fn, data_loader, device, prediction_file=None):
             ######## TODO: calculate loss, get predictions #########
             sentences = [i.to(device) for i in sentences]
             labels = labels.to(device)
+            # print(labels)
             logits = net.forward(sentences)
             loss = calculate_loss(logits, labels, loss_fn)
 
+            # print(logits)
+            # print(labels)
+
             maximum, idx = torch.max(logits, dim=1)
             pred = idx
+            # print(pred)
 
             ###################### End of your code ######################
 
             total_loss.append(loss.item())
-            y_true.append(labels[labels == 1].cpu())
+            # y_true.append(labels[labels == 1].cpu())
+            y_true.append(torch.argmax(labels, dim=1).cpu())
+            
             y_pred.append(pred.cpu())
 
     y_true = torch.cat(y_true)
     y_pred = torch.cat(y_pred)
+    # print(len(y_true[y_true == 0]))
+    # print(len(y_true[y_true == 1]))
+    # print(len(y_true[y_true == 2]))
+    # print(y_pred)
     accuracy = (y_true == y_pred).sum() / y_pred.shape[0]
     total_loss = sum(total_loss) / len(total_loss)
     # save predictions
@@ -178,6 +199,78 @@ def get_performance(net, loss_fn, data_loader, device, prediction_file=None):
         torch.save(y_pred, prediction_file)
 
     return accuracy, total_loss
+
+
+
+def evaluate(net, loss_fn, data_loader, device, prediction_file=None):
+    """
+    Evaluate model performance on validation set or test set.
+    Input:
+        - net: model
+        - loss_fn: loss function
+        - data_loader: data to evaluate, i.e. val or test
+        - device: device to use
+        - prediction_file: if not None, it's filename for the file that stores predictions
+    Return:
+        - accuracy: accuracy on validation set
+        - loss: loss on validation set
+    """
+    net.eval()
+    y_true = []  # true labels
+    y_pred = []  # predicted labels
+    total_loss = []  # loss for each batch
+
+    with torch.no_grad():
+        for sentences, labels in data_loader:
+            loss = None  # loss for this batch
+            pred = None
+            """
+            pred: predicted sentence_id for each question in the batch.
+            Predict -1 if the question is unanswerable.
+            Use P = 0.5 as the threshold for prediction.
+            A question is unanswerable if all context sentences have probability < 0.5.
+            Shape: 1-d tensor of length |Q_1| + |Q_2| + ..., where |Q_i| is the
+            number of questions in data point i.
+            """
+
+            ######## TODO: calculate loss, get predictions #########
+            sentences = [i.to(device) for i in sentences]
+            labels = labels.to(device)
+            # print(labels)
+            logits = net.forward(sentences)
+            loss = calculate_loss(logits, labels, loss_fn)
+
+            # print(logits)
+            # print(labels)
+
+            maximum, idx = torch.max(logits, dim=1)
+            pred = idx
+            # print(pred)
+
+            ###################### End of your code ######################
+
+            total_loss.append(loss.item())
+            # y_true.append(labels[labels == 1].cpu())
+            y_true.append(torch.argmax(labels, dim=1).cpu())
+            
+            y_pred.append(pred.cpu())
+
+    y_true = torch.cat(y_true)
+    y_pred = torch.cat(y_pred)
+    # print(len(y_true[y_true == 0]))
+    # print(len(y_true[y_true == 1]))
+    # print(len(y_true[y_true == 2]))
+    # print(y_pred)
+    accuracy = (y_true == y_pred).sum() / y_pred.shape[0]
+    total_loss = sum(total_loss) / len(total_loss)
+    # save predictions
+    if prediction_file is not None:
+        torch.save(y_pred, prediction_file)
+
+    mac_f1 = sklearn.metrics.f1_score(y_pred, y_true, average='macro')
+    mic_f1 = sklearn.metrics.f1_score(y_pred, y_true, average='micro')
+
+    return accuracy.item(), total_loss, mac_f1, mic_f1
 
 
 def plot_loss(stats):
