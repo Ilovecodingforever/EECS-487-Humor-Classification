@@ -8,7 +8,7 @@ import torch
 from nltk.tokenize import word_tokenize
 from os.path import exists
 from torch.utils.data import DataLoader
-
+# from data_augementation import back_translate
 
 def load_data(filename):
     """reads csv and return lists"""
@@ -55,6 +55,15 @@ class HumorDataset(Dataset):
                 self.label = torch.vstack((self.label, temp))
                 # print(self.label)
 
+# src_texts = ['I might be late tonight', 'What a movie, so bad', 'That was very kind']
+# back_texts = back_translate(src_texts, "en", "fr")
+
+# print(back_texts)
+
+        # print(data_text)
+        # back_texts = back_translate(data_text, "en", "fr")
+        # print(back_texts)
+        # print(sgdf)
         for t in data_text:
             w = word_tokenize(t.lower())
             lst = []

@@ -14,7 +14,7 @@ def get_loss_fn():
 
 
 def calculate_loss(logits, labels, loss_fn):
-    loss = loss_fn(logits, labels)
+    loss = loss_fn(logits, labels.float())
     return loss
 
 
@@ -61,16 +61,24 @@ def train_model(net, trn_loader, val_loader, optim, scheduler, num_epoch=50,
     for epoch in range(num_epoch):
         # Training:
         net.train()
-        for sentences, labels in trn_loader:
+        for x in trn_loader:
             num_itr += 1
             ############ TODO: calculate loss, update weights ############
-            sentences = [i.to(device) for i in sentences]
-            labels = labels.to(device)
+            # sentences = [i.to(device) for i in sentences]
+            # labels = labels.to(device)
 
+
+
+            input_ids, token_type_ids, attention_mask, labels = x.values()
+            # print(input_ids, token_type_ids, attention_mask, labels)
+
+ 
             optim.zero_grad()
-            logits = net(sentences)
-
+            logits = net(input_ids.to(device), attention_mask.to(device))
+            labels = torch.nn.functional.one_hot(labels.to(device), num_classes=3) 
             # print(labels)
+            # print(labels)
+            # print(logits)
             # print(gdfs)
 
             # print(logits)
@@ -152,7 +160,7 @@ def get_performance(net, loss_fn, data_loader, device, prediction_file=None):
     total_loss = []  # loss for each batch
 
     with torch.no_grad():
-        for sentences, labels in data_loader:
+        for x in data_loader:
             loss = None  # loss for this batch
             pred = None
             """
@@ -163,13 +171,33 @@ def get_performance(net, loss_fn, data_loader, device, prediction_file=None):
             Shape: 1-d tensor of length |Q_1| + |Q_2| + ..., where |Q_i| is the
             number of questions in data point i.
             """
+            input_ids, token_type_ids, attention_mask, labels = x.values()
+            # print(input_ids, token_type_ids, attention_mask, labels)
+
+ 
+            logits = net.forward(input_ids.to(device), attention_mask.to(device))
+            labels = torch.nn.functional.one_hot(labels.to(device), num_classes=3) 
+            # print(labels)
+            # print(gdfs)
+
+            # print(logits)
+            # print(labels)
+
+            loss = calculate_loss(logits, labels, loss_fn)
+
+            # for name, param in net.named_parameters():
+            #   if param.requires_grad:
+            #     print(name) #, param.data)
+            #     print(param.grad)
+
+
 
             ######## TODO: calculate loss, get predictions #########
-            sentences = [i.to(device) for i in sentences]
-            labels = labels.to(device)
-            # print(labels)
-            logits = net.forward(sentences)
-            loss = calculate_loss(logits, labels, loss_fn)
+            # sentences = [i.to(device) for i in sentences]
+            # labels = labels.to(device)
+            # # print(labels)
+            # logits = net.forward(sentences)
+            # loss = calculate_loss(logits, labels, loss_fn)
 
             # print(logits)
             # print(labels)
@@ -232,13 +260,33 @@ def evaluate(net, loss_fn, data_loader, device, prediction_file=None):
             Shape: 1-d tensor of length |Q_1| + |Q_2| + ..., where |Q_i| is the
             number of questions in data point i.
             """
+            input_ids, token_type_ids, attention_mask, labels = x.values()
+            # print(input_ids, token_type_ids, attention_mask, labels)
+
+ 
+            logits = net.forward(input_ids.to(device), attention_mask.to(device))
+            labels = torch.nn.functional.one_hot(labels.to(device), num_classes=3) 
+            # print(labels)
+            # print(gdfs)
+
+            # print(logits)
+            # print(labels)
+
+            loss = calculate_loss(logits, labels, loss_fn)
+
+            # for name, param in net.named_parameters():
+            #   if param.requires_grad:
+            #     print(name) #, param.data)
+            #     print(param.grad)
+
+
 
             ######## TODO: calculate loss, get predictions #########
-            sentences = [i.to(device) for i in sentences]
-            labels = labels.to(device)
-            # print(labels)
-            logits = net.forward(sentences)
-            loss = calculate_loss(logits, labels, loss_fn)
+            # sentences = [i.to(device) for i in sentences]
+            # labels = labels.to(device)
+            # # print(labels)
+            # logits = net.forward(sentences)
+            # loss = calculate_loss(logits, labels, loss_fn)
 
             # print(logits)
             # print(labels)
@@ -246,6 +294,23 @@ def evaluate(net, loss_fn, data_loader, device, prediction_file=None):
             maximum, idx = torch.max(logits, dim=1)
             pred = idx
             # print(pred)
+
+
+
+
+            ######## TODO: calculate loss, get predictions #########
+            # sentences = [i.to(device) for i in sentences]
+            # labels = labels.to(device)
+            # # print(labels)
+            # logits = net.forward(sentences)
+            # loss = calculate_loss(logits, labels, loss_fn)
+
+            # # print(logits)
+            # # print(labels)
+
+            # maximum, idx = torch.max(logits, dim=1)
+            # pred = idx
+            # # print(pred)
 
             ###################### End of your code ######################
 
