@@ -22,12 +22,8 @@ preds.csv: predictions outputted by BERT model
 
 train.py: contains functions for training LSTM model and getting LSTM model performance
 
+train.csv, dev.csv, gold-test-27446.csv: dataset containing all data, including translated texts
+
 other files are for book keeping
 
-
-
-
-
-
-train.csv, dev.csv, gold-test-27446.csv: dataset containing all data, including translated texts
 
