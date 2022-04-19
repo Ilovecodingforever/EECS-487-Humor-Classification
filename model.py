@@ -10,15 +10,13 @@ class Model(nn.Module):
         super().__init__()
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.hidden_dim = hidden_dim
-        self.lstm = nn.LSTM(input_size=300, hidden_size=hidden_dim, batch_first=True, dropout=0.5, num_layers=2, bidirectional=True)
+        self.lstm = nn.LSTM(input_size=300, hidden_size=hidden_dim, batch_first=True, dropout=0.1, num_layers=2, bidirectional=True)
         self.dense = nn.Linear(self.hidden_dim * 2, self.hidden_dim, device=device)
         self.relu = nn.ReLU()
         self.dense2 = nn.Linear(self.hidden_dim, 3, device=device)
         self.dropout = nn.Dropout(0.1)
         self.init_weights()
 
-    def init_weights(self):
-        pass
 
     def forward(self, sentences: List[torch.Tensor]):
         """

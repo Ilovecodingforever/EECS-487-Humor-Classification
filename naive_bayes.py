@@ -14,7 +14,7 @@ class NaiveBayes:
         self.category_prob = []
 
     def fit(self, data):
-        # TODO: store ngram counts for each category in self.ngram_count
+        # store ngram counts for each category in self.ngram_count
         self.vectorizer = CountVectorizer(ngram_range=(1, 2), max_df=0.8, min_df=3)
         self.vectorizer.fit(data.text)
         for label_i in range(len(pd.unique(data.is_humor))):
@@ -26,7 +26,7 @@ class NaiveBayes:
 
     def calculate_prob(self, docs, c_i, alpha):
         prob = None
-        # TODO: calculate probability of category c_i given each article in docs
+        # calculate probability of category c_i given each article in docs
         raw_counts = self.vectorizer.transform(docs)
         ngram_prob = (self.ngram_count[c_i] + alpha) / (self.total_count[c_i] +
                                                         alpha * len(self.vectorizer.vocabulary_))
@@ -37,7 +37,7 @@ class NaiveBayes:
 
     def predict(self, docs, alpha):
         prediction = [None] * len(docs)
-        # TODO: predict categories for the docs
+        # predict categories for the docs
         probs = [self.calculate_prob(docs, ci, alpha)[:, np.newaxis] for ci in range(len(self.category_prob))]
         probs = np.hstack(probs)
         prediction = np.argmax(probs, axis=1)
@@ -47,9 +47,7 @@ class NaiveBayes:
 
 def evaluate(predictions, labels):
     accuracy, mac_f1, mic_f1 = None, None, None
-    # TODO: calculate accuracy, macro f1, micro f1
-    # Note: you can assume labels contain all values from 0 to C - 1, where
-    # C is the number of categories
+
     predictions, labels = np.array(predictions), np.array(labels)
     num_category = labels.max() + 1
     accuracy = (predictions == labels).sum() / len(labels)

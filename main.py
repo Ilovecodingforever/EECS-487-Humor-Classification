@@ -62,6 +62,7 @@ def overfit(train_data):
 
 def baseline():
     """
+    baseline model
     prints metrics
     """
     train = load_data_nb("train.csv")

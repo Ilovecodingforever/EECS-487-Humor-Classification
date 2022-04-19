@@ -13,14 +13,14 @@ from torch.utils.data import DataLoader
 def load_data(filename):
     """reads csv and return lists"""
     df = pd.read_csv(filename, header=0,
-                     names=("id", "text", "is_humor", "humor_rating", "humor_controversy", "offense_rating"))
+                     names=("id", "text", "is_humor"))
     return df["text"].tolist(), df["is_humor"].tolist()
 
 
 def load_data_nb(filename):
     """same function, but for naive bayes, returns df"""
     df = pd.read_csv(filename, header=0,
-                     names=("id", "text", "is_humor", "humor_rating", "humor_controversy", "offense_rating"))
+                     names=("id", "text", "is_humor"))
     return df[['text', 'is_humor']]
 
 
@@ -55,10 +55,7 @@ class HumorDataset(Dataset):
                 self.label = torch.vstack((self.label, temp))
                 # print(self.label)
 
-# src_texts = ['I might be late tonight', 'What a movie, so bad', 'That was very kind']
-# back_texts = back_translate(src_texts, "en", "fr")
 
-# print(back_texts)
 
         # print(data_text)
         # back_texts = back_translate(data_text, "en", "fr")

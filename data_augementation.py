@@ -3,73 +3,40 @@ import csv
 import pandas as pd
 
 
-# Helper function to download data for a language
 def download(model_name):
+    """download data for a language"""
     tokenizer = MarianTokenizer.from_pretrained(model_name)
     model = MarianMTModel.from_pretrained(model_name)
     return tokenizer, model
 
+
 def assign_GPU(Tokenizer_output):
+    """put tensors to GPU"""
+    tokens_tensor = Tokenizer_output['input_ids'].to('cuda:0')
+    # token_type_ids = Tokenizer_output['token_type_ids'].to('cuda:0')
+    attention_mask = Tokenizer_output['attention_mask'].to('cuda:0')
 
-  tokens_tensor = Tokenizer_output['input_ids'].to('cuda:0')
-  # token_type_ids = Tokenizer_output['token_type_ids'].to('cuda:0')
-  attention_mask = Tokenizer_output['attention_mask'].to('cuda:0')
+    output = {'input_ids' : tokens_tensor, 
+              # 'token_type_ids' : token_type_ids, 
+              'attention_mask' : attention_mask}
 
-  output = {'input_ids' : tokens_tensor, 
-            # 'token_type_ids' : token_type_ids, 
-            'attention_mask' : attention_mask}
+    return output
 
-  return output
 
 def translate(texts, model, tokenizer, language):
     """Translate texts into a target language"""
     # Format the text as expected by the model
     formatter_fn = lambda txt: f"{txt}" if language == "en" else f">>{language}<< {txt}"
     original_texts = [formatter_fn(txt) for txt in texts]
-    # print(tokenizer(original_texts, return_tensors="pt", padding=True))
-    # Tokenize (text to tokens)
-    # tokens = tokenizer.prepare_seq2seq_batch(original_texts)
-
-    # # Translate
-    # translated = model.generate(**tokens)
-
-    # # Decode (tokens to text)
-    # translated_texts = tokenizer.batch_decode(translated, skip_special_tokens=True)
-
     translated = model.generate(**assign_GPU(tokenizer(original_texts, return_tensors="pt", padding=True)))
     translated_texts = [tokenizer.decode(t, skip_special_tokens=True) for t in translated]
 
     return translated_texts
 
 
-# src_text = [
-#     ">>fr<< this is a sentence in english that we want to translate to french",
-#     ">>pt<< This should go to portuguese",
-#     ">>es<< And this to Spanish",
-# ]
-
-# model_name = "Helsinki-NLP/opus-mt-en-ROMANCE"
-# tokenizer = MarianTokenizer.from_pretrained(model_name)
-
-# model = MarianMTModel.from_pretrained(model_name)
-# translated = model.generate(**tokenizer(src_text, return_tensors="pt", padding=True))
-# tgt_text = [tokenizer.decode(t, skip_special_tokens=True) for t in translated]
-# ["c'est une phrase en anglais que nous voulons traduire en français", 
-#  'Isto deve ir para o português.',
-#  'Y esto al español']
-
-
 def back_translate(texts, language_src, language_dst):
-    """Implements back translation"""
-
-    # download model for English -> Romance
     tmp_lang_tokenizer, tmp_lang_model = download('Helsinki-NLP/opus-mt-en-ROMANCE')
     device = tmp_lang_model.cuda().device
-    # print(device)
-    # tmp_lang_model = MarianMTModel.from_pretrained('Helsinki-NLP/opus-mt-en-ROMANCE')
-    # tmp_lang_tokenizer = MarianTokenizer.from_pretrained('Helsinki-NLP/opus-mt-en-ROMANCE')
-
-    # download model for Romance -> English
     src_lang_tokenizer, src_lang_model = download('Helsinki-NLP/opus-mt-ROMANCE-en')
 
     # Translate from source to target language
@@ -79,12 +46,6 @@ def back_translate(texts, language_src, language_dst):
     back_translated = translate(translated, src_lang_model.to(device=device), src_lang_tokenizer, language_src)
 
     return back_translated
-
-
-# src_texts = ['I might be late tonight', 'What a movie, so bad', 'That was very kind']
-# back_texts = back_translate(src_texts, "en", "fr")
-
-# print(back_texts)
 
 
 if __name__ == "__main__":
